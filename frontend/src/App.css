@@ -61,6 +61,33 @@ body {
   background: #56575a;
 }
 
+.icon-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  background-color: #3a3a3c;
+  color: white;
+
+  font-size: 20px;
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background-color: #565758;
+}
+
+.icon-button:active {
+  transform: scale(0.95);
+}
+
 main {
   width: min(100%, 520px);
 }
@@ -89,6 +116,40 @@ main {
   font-size: 1.5rem;
   font-weight: 700;
   text-transform: uppercase;
+}
+
+.keyboard {
+  width: min(100%, 520px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.keyboard-key {
+  height: 48px;
+  min-width: 36px;
+  border: none;
+  border-radius: 4px;
+  background: #818384;
+  color: #f8f8f8;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.keyboard-key:hover {
+  filter: brightness(1.1);
+}
+
+.wide-key {
+  min-width: 64px;
+  font-size: 0.75rem;
 }
 
 .footer {
