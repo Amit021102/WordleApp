@@ -1,10 +1,10 @@
-import Tile from './Tile';
+import Tile from "./Tile";
 
-const Row = ({ columns }) => {
+const Row = ({ letters }) => {
   return (
     <div className="row">
-      {Array.from({ length: columns }).map((_, index) => (
-        <Tile key={index} />
+      {letters.map((letter, index) => (
+        <Tile key={index} value={letter} />
       ))}
     </div>
   );

@@ -61,6 +61,10 @@ body {
   background: #56575a;
 }
 
+main {
+  width: min(100%, 520px);
+}
+
 .board {
   display: grid;
   gap: 8px;
@@ -70,7 +74,7 @@ body {
 .row {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
+  gap: 2px;
 }
 
 .tile {
