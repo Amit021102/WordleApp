@@ -118,6 +118,24 @@ main {
   text-transform: uppercase;
 }
 
+.tile-green {
+  background-color: #538d4e;
+  border-color: #538d4e;
+  color: #ffffff;
+}
+
+.tile-yellow {
+  background-color: #b59f3b;
+  border-color: #b59f3b;
+  color: #ffffff;
+}
+
+.tile-gray {
+  background-color: #3a3a3c;
+  border-color: #3a3a3c;
+  color: #ffffff;
+}
+
 .keyboard {
   width: min(100%, 520px);
   display: flex;

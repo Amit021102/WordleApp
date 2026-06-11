@@ -10,24 +10,34 @@ const BOARD_ROWS = 6;
 const BOARD_COLS = 5;
 
 const createEmptyBoard = () =>
-  Array.from({ length: BOARD_ROWS }, () => Array(BOARD_COLS).fill(""));
+  Array.from({ length: BOARD_ROWS }, () =>
+    Array.from({ length: BOARD_COLS }, () => ({
+      value: "",
+      status: "",
+    })),
+  );
 
 const App = () => {
   const [board, setBoard] = useState(createEmptyBoard);
-  const [activeRowIndex] = useState(0);
+  const [activeRowIndex, setActiveRowIndex] = useState(0);
 
   const addLetter = (letter) => {
     setBoard((currentBoard) => {
       const nextBoard = currentBoard.map((row) => [...row]);
       const activeRow = nextBoard[activeRowIndex];
 
-      const nextEmptyColumnIndex = activeRow.findIndex((cell) => cell === "");
+      const nextEmptyColumnIndex = activeRow.findIndex(
+        (cell) => cell.value === "",
+      );
 
       if (nextEmptyColumnIndex === -1) {
         return currentBoard;
       }
 
-      activeRow[nextEmptyColumnIndex] = letter.toUpperCase();
+      activeRow[nextEmptyColumnIndex] = {
+        value: letter.toUpperCase(),
+        // status: "",
+      };
 
       return nextBoard;
     });
@@ -38,7 +48,9 @@ const App = () => {
       const nextBoard = currentBoard.map((row) => [...row]);
       const activeRow = nextBoard[activeRowIndex];
 
-      const nextEmptyColumnIndex = activeRow.findIndex((cell) => cell === "");
+      const nextEmptyColumnIndex = activeRow.findIndex(
+        (cell) => cell.value === "",
+      );
 
       const lastFilledIndex =
         nextEmptyColumnIndex === -1 ? BOARD_COLS - 1 : nextEmptyColumnIndex - 1;
@@ -47,14 +59,17 @@ const App = () => {
         return currentBoard;
       }
 
-      activeRow[lastFilledIndex] = "";
+      activeRow[lastFilledIndex] = {
+        value: "",
+        // status: "",
+      };
 
       return nextBoard;
     });
   };
 
   const submitGuess = () => {
-    const guess = board[activeRowIndex].join("");
+    const guess = board[activeRowIndex].map((cell) => cell.value).join("");
 
     if (guess.length !== BOARD_COLS) {
       console.log("Not enough letters");
@@ -65,6 +80,7 @@ const App = () => {
 
     // Later:
     // call your backend here
+    // colorActiveRow(["green", "yellow", "gray", "gray", "green"]);
   };
 
   const handleKeyPress = (key) => {
@@ -81,6 +97,23 @@ const App = () => {
     if (/^[A-Za-z]$/.test(key)) {
       addLetter(key);
     }
+  };
+
+  const colorActiveRow = (statuses) => {
+    setBoard((currentBoard) => {
+      const nextBoard = currentBoard.map((row) =>
+        row.map((tile) => ({ ...tile })),
+      );
+
+      nextBoard[activeRowIndex] = nextBoard[activeRowIndex].map(
+        (tile, index) => ({
+          ...tile,
+          status: statuses[index],
+        }),
+      );
+
+      return nextBoard;
+    });
   };
 
   useEffect(() => {
