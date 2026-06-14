@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-
 import "./App.css";
 
 import IconButton from "./components/IconBtns";
 import Board from "./components/Board";
 import Keyboard from "./components/Keyboard";
+
+import { createGame, submitGuess } from "./api/gameApi";
 
 const BOARD_ROWS = 6;
 const BOARD_COLS = 5;
@@ -20,6 +21,8 @@ const createEmptyBoard = () =>
 const App = () => {
   const [board, setBoard] = useState(createEmptyBoard);
   const [activeRowIndex, setActiveRowIndex] = useState(0);
+  const [gameId, setGameId] = useState(null);
+  const [gameOver, setGameOver] = useState(false);
 
   const addLetter = (letter) => {
     setBoard((currentBoard) => {
@@ -68,7 +71,7 @@ const App = () => {
     });
   };
 
-  const submitGuess = () => {
+  const submitCurrentGuess = async () => {
     const guess = board[activeRowIndex].map((cell) => cell.value).join("");
 
     if (guess.length !== BOARD_COLS) {
@@ -76,26 +79,34 @@ const App = () => {
       return;
     }
 
-    console.log("Submitting guess:", guess);
+    const response = await submitGuess(gameId, guess);
 
-    // Later:
-    // call your backend here
-    // colorActiveRow(["green", "yellow", "gray", "gray", "green"]);
+    console.log(response);
+    if (response.valid) {
+      colorActiveRow(response.result);
+      setActiveRowIndex((index) => index + 1);
+      if (response.game_status !== "in_progress") {
+        setGameOver(true);
+        console.log("Game over! Status:", response.game_status);
+      }
+    }
   };
 
   const handleKeyPress = (key) => {
-    if (key === "Enter" || key === "ENTER") {
-      submitGuess();
-      return;
-    }
+    if (!gameOver) {
+      if (key === "Enter" || key === "ENTER") {
+        submitCurrentGuess();
+        return;
+      }
 
-    if (key === "Backspace" || key === "BACKSPACE") {
-      eraseLetter();
-      return;
-    }
+      if (key === "Backspace" || key === "BACKSPACE") {
+        eraseLetter();
+        return;
+      }
 
-    if (/^[A-Za-z]$/.test(key)) {
-      addLetter(key);
+      if (/^[A-Za-z]$/.test(key)) {
+        addLetter(key);
+      }
     }
   };
 
@@ -116,6 +127,20 @@ const App = () => {
     });
   };
 
+  // game init use effect
+  useEffect(() => {
+    const startGame = async () => {
+      const gameData = await createGame();
+
+      setGameId(gameData.game_id);
+
+      console.log("Created game:", gameData);
+    };
+
+    startGame();
+  }, []);
+
+  // keyboard event listener use effect
   useEffect(() => {
     const handleKeyDown = (event) => {
       event.preventDefault();

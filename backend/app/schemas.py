@@ -1,7 +1,11 @@
 from typing import List, Optional
-
 from pydantic import BaseModel
 
+
+class CreateGameResponse(BaseModel):
+    game_id: str
+    word_length: int
+    max_attempts: int
 
 class GuessRequest(BaseModel):
     guess: str
