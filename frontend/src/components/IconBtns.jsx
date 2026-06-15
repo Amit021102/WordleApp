@@ -1,6 +1,11 @@
-const IconButton = ({ children, label }) => {
+const IconButton = ({ children, label, onClick }) => {
   return (
-    <button type="button" className="icon-button" aria-label={label}>
+    <button
+      type="button"
+      className="icon-button"
+      aria-label={label}
+      onClick={onClick}
+    >
       {children}
     </button>
   );

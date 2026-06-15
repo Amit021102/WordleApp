@@ -5,6 +5,11 @@ import IconButton from "./components/IconBtns";
 import Board from "./components/Board";
 import Keyboard from "./components/Keyboard";
 
+import SettingsModal from "./components/popups/SettingsModal";
+import HelpModal from "./components/popups/HelpModal";
+import GameResultModal from "./components/popups/GameResultModal";
+import Toast from "./components/popups/Toast";
+
 import { createGame, submitGuess } from "./api/gameApi";
 
 const BOARD_ROWS = 6;
@@ -30,6 +35,8 @@ const App = () => {
   const [gameId, setGameId] = useState(null);
   const [gameOver, setGameOver] = useState(false);
   const [keyStatuses, setKeyStatuses] = useState({});
+  const [activeModal, setActiveModal] = useState(null);
+  const [toast, setToast] = useState(null);
 
   const addLetter = (letter) => {
     setBoard((currentBoard) => {
@@ -82,7 +89,10 @@ const App = () => {
     const guess = board[activeRowIndex].map((cell) => cell.value).join("");
 
     if (guess.length !== BOARD_COLS) {
-      console.log("Not enough letters");
+      setToast({
+        id: Date.now(),
+        message: "Not enough letters",
+      });
       return;
     }
 
@@ -93,10 +103,17 @@ const App = () => {
       colorActiveRow(response.result);
       updateKeyStatuses(guess, response.result);
       setActiveRowIndex((index) => index + 1);
-      if (response.game_status !== "in_progress") {
+
+      const game_status = response.game_status;
+      if (game_status !== "in_progress") {
         setGameOver(true);
-        console.log("Game over! Status:", response.game_status);
+        setActiveModal(game_status);
       }
+    } else {
+      setToast({
+        id: Date.now(),
+        message: "Not in word list",
+      });
     }
   };
 
@@ -182,12 +199,29 @@ const App = () => {
     };
   });
 
+  // toast auto-dismiss
+  useEffect(() => {
+    if (!toast) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      setToast(null);
+    }, 2000);
+
+    return () => clearTimeout(timeoutId);
+  }, [toast]);
+
   return (
     <div className="app">
       <header className="header">
-        <IconButton label="Help">?</IconButton>
+        <IconButton label="Help" onClick={() => setActiveModal("help")}>
+          ?
+        </IconButton>
         <h1>Wordle</h1>
-        <IconButton label="Settings">⚙</IconButton>
+        <IconButton label="Settings" onClick={() => setActiveModal("settings")}>
+          ⚙
+        </IconButton>
       </header>
 
       <main>
@@ -197,6 +231,23 @@ const App = () => {
       <footer className="footer">
         <Keyboard onKeyPress={handleKeyPress} keyStatuses={keyStatuses} />
       </footer>
+
+      {activeModal === "settings" && (
+        <SettingsModal onClose={() => setActiveModal(null)} />
+      )}
+
+      {activeModal === "help" && (
+        <HelpModal onClose={() => setActiveModal(null)} />
+      )}
+
+      {(activeModal === "won" || activeModal === "lost") && (
+        <GameResultModal
+          result={activeModal}
+          onClose={() => setActiveModal(null)}
+        />
+      )}
+
+      <Toast message={toast?.message} />
     </div>
   );
 };
