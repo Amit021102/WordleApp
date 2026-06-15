@@ -10,6 +10,12 @@ import { createGame, submitGuess } from "./api/gameApi";
 const BOARD_ROWS = 6;
 const BOARD_COLS = 5;
 
+const STATUS_PRIORITY = {
+  gray: 1,
+  yellow: 2,
+  green: 3,
+};
+
 const createEmptyBoard = () =>
   Array.from({ length: BOARD_ROWS }, () =>
     Array.from({ length: BOARD_COLS }, () => ({
@@ -23,6 +29,7 @@ const App = () => {
   const [activeRowIndex, setActiveRowIndex] = useState(0);
   const [gameId, setGameId] = useState(null);
   const [gameOver, setGameOver] = useState(false);
+  const [keyStatuses, setKeyStatuses] = useState({});
 
   const addLetter = (letter) => {
     setBoard((currentBoard) => {
@@ -84,6 +91,7 @@ const App = () => {
     console.log(response);
     if (response.valid) {
       colorActiveRow(response.result);
+      updateKeyStatuses(guess, response.result);
       setActiveRowIndex((index) => index + 1);
       if (response.game_status !== "in_progress") {
         setGameOver(true);
@@ -127,6 +135,26 @@ const App = () => {
     });
   };
 
+  const updateKeyStatuses = (guess, results) => {
+    setKeyStatuses((currentStatuses) => {
+      const nextStatuses = { ...currentStatuses };
+
+      results.forEach((status, index) => {
+        const letter = guess[index].toUpperCase();
+        const currentStatus = nextStatuses[letter];
+
+        if (
+          !currentStatus ||
+          STATUS_PRIORITY[status] > STATUS_PRIORITY[currentStatus]
+        ) {
+          nextStatuses[letter] = status;
+        }
+      });
+
+      return nextStatuses;
+    });
+  };
+
   // game init use effect
   useEffect(() => {
     const startGame = async () => {
@@ -167,7 +195,7 @@ const App = () => {
       </main>
 
       <footer className="footer">
-        <Keyboard onKeyPress={handleKeyPress} />
+        <Keyboard onKeyPress={handleKeyPress} keyStatuses={keyStatuses} />
       </footer>
     </div>
   );

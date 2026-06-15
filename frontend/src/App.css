@@ -44,8 +44,7 @@ body {
   text-transform: uppercase;
 }
 
-.header button,
-.footer button {
+.header button {
   border: none;
   border-radius: 6px;
   background: #3a3a3c;
@@ -56,8 +55,7 @@ body {
   transition: background 0.2s ease;
 }
 
-.header button:hover,
-.footer button:hover {
+.header button:hover {
   background: #56575a;
 }
 
@@ -168,6 +166,18 @@ main {
 .wide-key {
   min-width: 64px;
   font-size: 0.75rem;
+}
+
+.key-green {
+  background-color: #538d4e;
+}
+
+.key-yellow {
+  background-color: #b59f3b;
+}
+
+.key-gray {
+  background-color: #3a3a3c;
 }
 
 .footer {
