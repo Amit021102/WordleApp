@@ -32,6 +32,7 @@ const createEmptyBoard = () =>
 const App = () => {
   const [board, setBoard] = useState(createEmptyBoard);
   const [activeRowIndex, setActiveRowIndex] = useState(0);
+  const [finalGuessCount, setFinalGuessCount] = useState(0);
   const [gameId, setGameId] = useState(null);
   const [gameOver, setGameOver] = useState(false);
   const [keyStatuses, setKeyStatuses] = useState({});
@@ -107,6 +108,7 @@ const App = () => {
       const game_status = response.game_status;
       if (game_status !== "in_progress") {
         setGameOver(true);
+        setFinalGuessCount(activeRowIndex + 1);
         setActiveModal(game_status);
       }
     } else {
@@ -243,6 +245,7 @@ const App = () => {
       {(activeModal === "won" || activeModal === "lost") && (
         <GameResultModal
           result={activeModal}
+          guessCount={finalGuessCount}
           onClose={() => setActiveModal(null)}
         />
       )}

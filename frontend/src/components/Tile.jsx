@@ -1,8 +1,8 @@
-const Tile = ({ value, status }) => {
-  const className = status ? `tile tile-${status}` : "tile";
+const Tile = ({ value, status, className = "" }) => {
+  const statusClass = status ? `tile-${status}` : "";
   return (
     <div
-      className={className}
+      className={`tile ${statusClass} ${className}`.trim()}
       role="gridcell"
       aria-label={value ? `tile ${value}` : "empty tile"}
     >

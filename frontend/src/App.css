@@ -209,27 +209,125 @@ main {
 
 .modal-content {
   position: relative;
-
   width: min(90vw, 420px);
   min-height: 300px;
   padding: 32px;
 
-  border-radius: 8px;
-  background-color: white;
+  border-radius: 12px;
+  background-color: #f1f1f1;
   color: #121213;
+
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.35);
 }
 
 .modal-close-button {
   position: absolute;
-  top: 10px;
-  right: 12px;
+  top: 12px;
+  right: 14px;
+
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   border: none;
+  border-radius: 50%;
   background: transparent;
-  color: #121213;
+  color: #333;
 
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   cursor: pointer;
+}
+
+.modal-close-button:hover {
+  background-color: #dddddd;
+}
+
+.game-result-modal {
+  min-height: 235px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+.game-result-title {
+  margin: 0 0 20px;
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.game-result-message {
+  margin-bottom: 28px;
+}
+
+.game-result-message p {
+  margin: 6px 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.admire-puzzle-button {
+  min-width: 160px;
+  padding: 12px 22px;
+
+  border: none;
+  border-radius: 8px;
+
+  background-color: #538d4e;
+  color: white;
+
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
+}
+
+.admire-puzzle-button:hover {
+  background-color: #477a43;
+}
+
+.admire-puzzle-button:active {
+  transform: scale(0.97);
+}
+
+.help-modal {
+  text-align: left;
+}
+
+.help-modal h2 {
+  margin-top: 0;
+  text-align: center;
+}
+
+.help-rule {
+  margin-top: 24px;
+}
+
+.help-rule p {
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.help-example-word {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.example-tile {
+  width: 42px;
+  height: 42px;
+  font-size: 1.1rem;
+  flex-shrink: 0;
 }
 
 .toast {
