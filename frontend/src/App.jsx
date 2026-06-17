@@ -38,6 +38,7 @@ const App = () => {
   const [keyStatuses, setKeyStatuses] = useState({});
   const [activeModal, setActiveModal] = useState(null);
   const [toast, setToast] = useState(null);
+  const [theme, setTheme] = useState("dark");
 
   const addLetter = (letter) => {
     setBoard((currentBoard) => {
@@ -109,7 +110,10 @@ const App = () => {
       if (game_status !== "in_progress") {
         setGameOver(true);
         setFinalGuessCount(activeRowIndex + 1);
-        setActiveModal(game_status);
+
+        setTimeout(() => {
+          setActiveModal(game_status);
+        }, 2000);
       }
     } else {
       setToast({
@@ -215,18 +219,21 @@ const App = () => {
   }, [toast]);
 
   return (
-    <div className="app">
+    <div className={`app theme-${theme}`}>
       <header className="header">
         <IconButton label="Help" onClick={() => setActiveModal("help")}>
           ?
         </IconButton>
-        <h1>Wordle</h1>
+        <h1>Infinite Wordle</h1>
         <IconButton label="Settings" onClick={() => setActiveModal("settings")}>
           ⚙
         </IconButton>
       </header>
 
       <main>
+        <IconButton label="New game" onClick={() => startGame()}>
+          New game
+        </IconButton>
         <Board board={board} />
       </main>
 
@@ -235,7 +242,11 @@ const App = () => {
       </footer>
 
       {activeModal === "settings" && (
-        <SettingsModal onClose={() => setActiveModal(null)} />
+        <SettingsModal
+          theme={theme}
+          onThemeChange={setTheme}
+          onClose={() => setActiveModal(null)}
+        />
       )}
 
       {activeModal === "help" && (

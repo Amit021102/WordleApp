@@ -13,7 +13,7 @@ const HelpModal = ({ onClose }) => {
           <p>
             <strong>Green</strong> means the letter is in the correct place.
           </p>
-          <div className="help-example-word-green">
+          <div className="help-example-word">
             <Tile value="W" className="example-tile" />
             <Tile value="O" status="green" className="example-tile" />
             <Tile value="R" className="example-tile" />
@@ -27,7 +27,7 @@ const HelpModal = ({ onClose }) => {
             <strong>Yellow</strong> means the letter is in the word but in the
             wrong place.
           </p>
-          <div className="help-example-word-yellow">
+          <div className="help-example-word">
             <Tile value="G" className="example-tile" />
             <Tile value="A" className="example-tile" />
             <Tile value="M" className="example-tile" />
@@ -41,7 +41,7 @@ const HelpModal = ({ onClose }) => {
             <strong>Gray</strong> means the letter is not in the word.
           </p>
 
-          <div className="help-example-word-gray">
+          <div className="help-example-word">
             <Tile value="R" status="gray" className="example-tile" />
             <Tile value="E" className="example-tile" />
             <Tile value="A" className="example-tile" />

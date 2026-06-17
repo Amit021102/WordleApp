@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.schemas import GuessRequest, GuessResponse, CreateGameResponse
 from app.services.game_service import GameService
+from app.words import random_select_answer
 
 game_service = GameService()
 router = APIRouter()
@@ -17,7 +18,7 @@ def health_check():
     response_model=CreateGameResponse
 )
 def create_game():
-    game_id = game_service.create_game(answer="crane")
+    game_id = game_service.create_game(answer=random_select_answer())
 
     return CreateGameResponse(
         game_id=game_id,
