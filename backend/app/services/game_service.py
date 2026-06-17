@@ -37,10 +37,13 @@ class GameService:
 
         game["guesses"].append({"guess": guess, "result": result})
 
+        answer = "?????"
+
         if guess == game["answer"]:
             game["status"] = "won"
         elif len(game["guesses"]) >= 6:
             game["status"] = "lost"
+            answer = game["answer"]
 
         return GuessResponse(
             valid=True,
@@ -48,4 +51,5 @@ class GameService:
             result=result,
             attempt_number=len(game["guesses"]),
             game_status=game["status"],
+            answer=answer,
         )

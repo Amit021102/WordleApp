@@ -35,10 +35,27 @@ const App = () => {
   const [finalGuessCount, setFinalGuessCount] = useState(0);
   const [gameId, setGameId] = useState(null);
   const [gameOver, setGameOver] = useState(false);
+  const [correctWord, setCorrectWord] = useState("")
   const [keyStatuses, setKeyStatuses] = useState({});
   const [activeModal, setActiveModal] = useState(null);
   const [toast, setToast] = useState(null);
   const [theme, setTheme] = useState("dark");
+
+  const startNewGame = async () => {
+  try {
+    const gameData = await createGame();
+
+    setBoard(createEmptyBoard());
+    setKeyStatuses({})
+    setActiveRowIndex(0);
+    setGameId(gameData.game_id);
+    setGameOver(false);
+
+    console.log("Created game:", gameData);
+  } catch (error) {
+    console.error("Could not start a new game:", error);
+  }
+};
 
   const addLetter = (letter) => {
     setBoard((currentBoard) => {
@@ -109,6 +126,7 @@ const App = () => {
       const game_status = response.game_status;
       if (game_status !== "in_progress") {
         setGameOver(true);
+        setCorrectWord(response.answer)
         setFinalGuessCount(activeRowIndex + 1);
 
         setTimeout(() => {
@@ -180,15 +198,7 @@ const App = () => {
 
   // game init use effect
   useEffect(() => {
-    const startGame = async () => {
-      const gameData = await createGame();
-
-      setGameId(gameData.game_id);
-
-      console.log("Created game:", gameData);
-    };
-
-    startGame();
+    startNewGame();
   }, []);
 
   // keyboard event listener use effect
@@ -231,9 +241,15 @@ const App = () => {
       </header>
 
       <main>
-        <IconButton label="New game" onClick={() => startGame()}>
-          New game
-        </IconButton>
+        <div className="board-toolbar">
+          <button
+            type="button"
+            className="new-game-button"
+            onClick={startNewGame}
+          >
+            New game
+          </button>
+        </div>
         <Board board={board} />
       </main>
 
@@ -257,7 +273,13 @@ const App = () => {
         <GameResultModal
           result={activeModal}
           guessCount={finalGuessCount}
+          answer={correctWord}
           onClose={() => setActiveModal(null)}
+          playAgain={() => {
+            setActiveModal(null)
+            startNewGame()
+          }
+          }
         />
       )}
 

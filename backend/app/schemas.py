@@ -18,3 +18,4 @@ class GuessResponse(BaseModel):
     attempt_number: Optional[int] = None
     game_status: Optional[str] = None
     message: Optional[str] = None
+    answer: Optional[str] = None

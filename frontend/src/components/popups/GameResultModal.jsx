@@ -19,7 +19,7 @@ const getWinTagline = (guessCount) => {
   }
 };
 
-const GameResultModal = ({ result, guessCount, onClose }) => {
+const GameResultModal = ({ result, guessCount, answer, onClose, playAgain }) => {
   const didWin = result === "won";
   const tagline = didWin
     ? getWinTagline(guessCount)
@@ -29,22 +29,34 @@ const GameResultModal = ({ result, guessCount, onClose }) => {
     <Modal onClose={onClose}>
       <div className="game-result-modal">
         <h2 className="game-result-title">
-          {didWin ? "You won!" : "Game over"}
+          {didWin ? "You won!" : "Better luck next time..."}
         </h2>
 
         <div className="game-result-message">
           <p>{tagline}</p>
 
-          {didWin && <p>You solved it in {guessCount} guesses.</p>}
+          {didWin && <p>You solved it in {guessCount} guesses</p>}
+          {!didWin && <p>The correct word was <strong>{answer}</strong></p>}
         </div>
 
-        <button
-          type="button"
-          className="admire-puzzle-button"
-          onClick={onClose}
-        >
-          Admire puzzle
-        </button>
+        <div className="game-over-actions">
+          <button
+            type="button"
+            className="admire-puzzle-button"
+            onClick={onClose}
+          >
+            Admire puzzle
+          </button>
+
+          <button
+            type="button"
+            className="new-game-button"
+            onClick={playAgain}
+          >
+            Play again
+          </button>
+        </div>
+        
       </div>
     </Modal>
   );
