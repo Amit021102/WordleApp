@@ -40,6 +40,7 @@ const App = () => {
   const [activeModal, setActiveModal] = useState(null);
   const [toast, setToast] = useState(null);
   const [theme, setTheme] = useState("dark");
+  const [shakingRowIndex, setShakingRowIndex] = useState(null);
 
   const startNewGame = async () => {
   try {
@@ -112,6 +113,7 @@ const App = () => {
         id: Date.now(),
         message: "Not enough letters",
       });
+      shakeActiveRow();
       return;
     }
 
@@ -138,6 +140,7 @@ const App = () => {
         id: Date.now(),
         message: "Not in word list",
       });
+      shakeActiveRow();
     }
   };
 
@@ -196,6 +199,14 @@ const App = () => {
     });
   };
 
+  const shakeActiveRow = () => {
+    setShakingRowIndex(activeRowIndex);
+
+    setTimeout(() => {
+      setShakingRowIndex(null);
+    }, 450);
+  };
+
   // game init use effect
   useEffect(() => {
     startNewGame();
@@ -250,7 +261,10 @@ const App = () => {
             New game
           </button>
         </div>
-        <Board board={board} />
+        <Board
+        board={board}
+        shakingRowIndex={shakingRowIndex}
+        />
       </main>
 
       <footer className="footer">

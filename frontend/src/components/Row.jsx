@@ -1,10 +1,15 @@
 import Tile from "./Tile";
 
-const Row = ({ tiles }) => {
+const Row = ({ tiles, isShaking }) => {
   return (
-    <div className="row">
+    <div className={`row ${isShaking ? "row-shake" : ""}`}>
       {tiles.map((tile, index) => (
-        <Tile key={index} value={tile.value} status={tile.status} />
+        <Tile
+          key={index}
+          value={tile.value}
+          status={tile.status}
+          index={index}
+        />
       ))}
     </div>
   );

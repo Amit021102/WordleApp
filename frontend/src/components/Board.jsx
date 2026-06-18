@@ -1,10 +1,14 @@
 import Row from "./Row";
 
-const Board = ({ board }) => {
+const Board = ({ board, shakingRowIndex }) => {
   return (
     <div className="board">
       {board.map((row, rowIndex) => (
-        <Row key={rowIndex} tiles={row} />
+        <Row
+          key={rowIndex}
+          tiles={row}
+          isShaking={rowIndex === shakingRowIndex}
+        />
       ))}
     </div>
   );
