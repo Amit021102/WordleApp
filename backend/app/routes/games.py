@@ -1,6 +1,12 @@
 from fastapi import APIRouter
 
-from app.schemas import GuessRequest, GuessResponse, CreateGameResponse
+from app.schemas import (
+    GuessRequest,
+    GuessResponse,
+    CreateGameResponse,
+    UpdateGameRequest,
+    UpdateGameResponse,
+)
 from app.services.game_service import GameService
 from app.words import random_select_answer
 
@@ -17,13 +23,16 @@ def health_check():
     "/api/games",
     response_model=CreateGameResponse
 )
-def create_game():
-    game_id = game_service.create_game(answer=random_select_answer())
+def create_game(hard_mode: bool = False):
+    game_id = game_service.create_game(answer=random_select_answer(), hard_mode=hard_mode)
+    game = game_service.get_game(game_id)
 
     return CreateGameResponse(
         game_id=game_id,
         word_length=5,
         max_attempts=6,
+        hard_mode=game["hard_mode"],
+        hard_mode_constraints=game["hard_mode_constraints"],
     )
 
 @router.post(
@@ -35,3 +44,17 @@ def make_guess(
     request: GuessRequest
 ):
     return game_service.make_guess(game_id, request.guess.lower())
+
+@router.patch(
+    "/api/games/{game_id}/hard_mode",
+    response_model=UpdateGameResponse
+)
+def set_game_hard_mode(
+    game_id: str,
+    request: UpdateGameRequest
+):
+    game = game_service.set_hard_mode(game_id, request.hard_mode)
+    return UpdateGameResponse(
+        hard_mode=game["hard_mode"],
+        hard_mode_constraints=game["hard_mode_constraints"],
+    )

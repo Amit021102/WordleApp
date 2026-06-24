@@ -10,7 +10,7 @@ import HelpModal from "./components/popups/HelpModal";
 import GameResultModal from "./components/popups/GameResultModal";
 import Toast from "./components/popups/Toast";
 
-import { createGame, submitGuess } from "./api/gameApi";
+import { createGame, submitGuess, updateHardMode } from "./api/gameApi";
 
 const BOARD_ROWS = 6;
 const BOARD_COLS = 5;
@@ -34,6 +34,7 @@ const App = () => {
   const [activeRowIndex, setActiveRowIndex] = useState(0);
   const [finalGuessCount, setFinalGuessCount] = useState(0);
   const [gameId, setGameId] = useState(null);
+  const [hardMode, setHardMode] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [correctWord, setCorrectWord] = useState("")
   const [keyStatuses, setKeyStatuses] = useState({});
@@ -42,21 +43,22 @@ const App = () => {
   const [theme, setTheme] = useState("dark");
   const [shakingRowIndex, setShakingRowIndex] = useState(null);
 
-  const startNewGame = async () => {
-  try {
-    const gameData = await createGame();
+  const startNewGame = async (initialHardMode = false) => {
+    try {
+      const gameData = await createGame(initialHardMode);
 
-    setBoard(createEmptyBoard());
-    setKeyStatuses({})
-    setActiveRowIndex(0);
-    setGameId(gameData.game_id);
-    setGameOver(false);
+      setBoard(createEmptyBoard());
+      setKeyStatuses({});
+      setActiveRowIndex(0);
+      setGameId(gameData.game_id);
+      setGameOver(false);
+      setHardMode(gameData.hard_mode);
 
-    console.log("Created game:", gameData);
-  } catch (error) {
-    console.error("Could not start a new game:", error);
-  }
-};
+      console.log("Created game:", gameData);
+    } catch (error) {
+      console.error("Could not start a new game:", error);
+    }
+  };
 
   const addLetter = (letter) => {
     setBoard((currentBoard) => {
@@ -138,7 +140,7 @@ const App = () => {
     } else {
       setToast({
         id: Date.now(),
-        message: "Not in word list",
+        message: response.message || "Invalid guess",
       });
       shakeActiveRow();
     }
@@ -207,6 +209,23 @@ const App = () => {
     }, 450);
   };
 
+  const toggleHardMode = async (newHardMode) => {
+    if (!gameId) {
+      return;
+    }
+
+    try {
+      const response = await updateHardMode(gameId, newHardMode);
+      setHardMode(response.hard_mode);
+    } catch (error) {
+      console.error("Could not update hard mode:", error);
+      setToast({
+        id: Date.now(),
+        message: "Failed to update hard mode",
+      });
+    }
+  };
+
   // game init use effect
   useEffect(() => {
     startNewGame();
@@ -256,7 +275,7 @@ const App = () => {
           <button
             type="button"
             className="new-game-button"
-            onClick={startNewGame}
+            onClick={() => startNewGame(hardMode)}
           >
             New game
           </button>
@@ -275,6 +294,8 @@ const App = () => {
         <SettingsModal
           theme={theme}
           onThemeChange={setTheme}
+          isHardMode={hardMode}
+          onHardModeChange={toggleHardMode}
           onClose={() => setActiveModal(null)}
         />
       )}
@@ -291,7 +312,7 @@ const App = () => {
           onClose={() => setActiveModal(null)}
           playAgain={() => {
             setActiveModal(null)
-            startNewGame()
+            startNewGame(hardMode)
           }
           }
         />

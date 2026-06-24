@@ -1,6 +1,6 @@
 import Modal from "./Modal";
 
-const SettingsModal = ({ theme, onThemeChange, onClose }) => {
+const SettingsModal = ({ theme, onThemeChange, isHardMode, onHardModeChange, onClose }) => {
   return (
     <Modal onClose={onClose}>
       <div className="settings-modal">
@@ -30,7 +30,15 @@ const SettingsModal = ({ theme, onThemeChange, onClose }) => {
           </button>
         </div>
 
-        {/* future settings go below */}
+        <div className="hard-mode-toggle">
+          <label htmlFor="hard-mode-checkbox">Hard mode</label>
+          <input
+            type="checkbox"
+            id="hard-mode-checkbox"
+            checked={isHardMode}
+            onChange={() => onHardModeChange(!isHardMode)}
+          />
+        </div>
       </div>
     </Modal>
   );
