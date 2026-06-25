@@ -1,9 +1,10 @@
 from fastapi import APIRouter
 
 from app.schemas import (
+    CreateGameRequest,
+    CreateGameResponse,
     GuessRequest,
     GuessResponse,
-    CreateGameResponse,
     UpdateGameRequest,
     UpdateGameResponse,
 )
@@ -23,8 +24,11 @@ def health_check():
     "/api/games",
     response_model=CreateGameResponse
 )
-def create_game(hard_mode: bool = False):
-    game_id = game_service.create_game(answer=random_select_answer(), hard_mode=hard_mode)
+def create_game(request: CreateGameRequest):
+    game_id = game_service.create_game(
+        answer=random_select_answer(),
+        hard_mode=request.hard_mode,
+    )
     game = game_service.get_game(game_id)
 
     return CreateGameResponse(

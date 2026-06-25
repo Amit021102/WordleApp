@@ -15,6 +15,9 @@ class CreateGameResponse(BaseModel):
     hard_mode: bool = False
     hard_mode_constraints: HardModeConstraints
 
+class CreateGameRequest(BaseModel):
+    hard_mode: bool = False
+
 class UpdateGameRequest(BaseModel):
     hard_mode: bool
 

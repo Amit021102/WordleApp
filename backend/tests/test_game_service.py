@@ -87,8 +87,28 @@ def test_make_guess_invalid_guess_updates_game_state():
     assert response_valid.guess == "cider"
     assert response_valid.result == ["green", "green", "gray", "gray", "green"]
     assert response_valid.attempt_number == 1
-    assert response_valid.game_status == "in_progress"  
-    
+    assert response_valid.game_status == "in_progress"
+
+
+def test_create_game_with_hard_mode_stores_flag():
+    service = GameService()
+    game_id = service.create_game("cigar", hard_mode=True)
+
+    assert games[game_id]["hard_mode"] is True
+
+
+def test_hard_mode_rejects_non_compliant_guess():
+    service = GameService()
+    game_id = service.create_game("cigar", hard_mode=True)
+
+    first_response = service.make_guess(game_id, "cider")
+    assert first_response.valid is True
+
+    second_response = service.make_guess(game_id, "cider")
+    assert second_response.valid is False
+    assert second_response.message == "Word is not allowed on hard mode"
+
+
 def test_make_guess_fail_game():
     service = GameService()
     game_id = service.create_game("cigar")
