@@ -46,13 +46,14 @@ const App = () => {
   const startNewGame = async (initialHardMode = false) => {
     try {
       const gameData = await createGame(initialHardMode);
+      // console.log("Game data received:", gameData);
 
       setBoard(createEmptyBoard());
       setKeyStatuses({});
       setActiveRowIndex(0);
       setGameId(gameData.game_id);
       setGameOver(false);
-      setHardMode(gameData.hard_mode);
+      setHardMode(initialHardMode);
 
       console.log("Created game:", gameData);
     } catch (error) {

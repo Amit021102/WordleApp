@@ -52,6 +52,12 @@
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: var(--text-color);
   background-color: var(--page-background);
+
+  /* switch dimensions */
+  --width-of-switch: 3.5em;
+  --height-of-switch: 2em;
+  --size-of-icon: 1.4em;
+  --slider-offset: 0.3em;
 }
 
 * {
@@ -318,7 +324,7 @@ main {
   border: none;
   border-radius: 50%;
   background: transparent;
-  color: var(--text-color);
+  color: var(--modal-text-color);
 
   font-size: 1.6rem;
   cursor: pointer;
@@ -533,4 +539,80 @@ main {
   75% {
     transform: translateX(-2px);
   }
+}
+
+.switch input {
+  /* hide the input */
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.switch {
+  display: block;
+  position: relative;
+  width: var(--width-of-switch);
+  height: var(--height-of-switch);
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #cfcfd1;
+  transition: 0.4s;
+  border-radius: 30px;
+}
+
+.slider::before {
+  position: absolute;
+  content: "";
+  height: var(--size-of-icon, 1.4em);
+  width: var(--size-of-icon, 1.4em);
+  border-radius: 20px;
+  left: var(--slider-offset, 0.3em);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #538d4e;
+  transition: 0.4s;
+}
+
+input:checked + .slider {
+  background: #538d4e;
+}
+
+input:checked + .slider::before {
+  left: calc(100% - (var(--size-of-icon, 1.4em) + var(--slider-offset, 0.3em)));
+  background: #cfcfd1;
+
+  /* chnage the value of the second inset in boxshadow to change the angle and direction of the moon */
+  /* box-shadow: inset -3px -2px 5px -2px #8983f7, inset -7px -5px 0 2px #a3dafb; */
+}
+
+.theme-slider::before {
+  position: absolute;
+  content: "";
+  height: var(--size-of-icon, 1.4em);
+  width: var(--size-of-icon, 1.4em);
+  border-radius: 20px;
+  left: var(--slider-offset, 0.3em);
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(40deg, #ff0080, #ff8c00 70%);
+  transition: 0.4s;
+}
+
+input:checked + .theme-slider {
+  background: #303136;
+}
+
+input:checked + .theme-slider::before {
+  left: calc(100% - (var(--size-of-icon, 1.4em) + var(--slider-offset, 0.3em)));
+  background: #303136;
+
+  /* chnage the value of the second inset in boxshadow to change the angle and direction of the moon */
+  box-shadow: inset -3px -2px 5px -2px #8983f7, inset -7px -5px 0 2px #a3dafb;
 }
