@@ -5,39 +5,17 @@ const SettingsModal = ({ theme, onThemeChange, isHardMode, onHardModeChange, onC
   return (
     <Modal onClose={onClose}>
       <div className="settings-modal">
-        <div className="theme-selector">
-          {/* <button
-            type="button"
-            className={`theme-button ${
-              theme === "light" ? "theme-button-active" : ""
-            }`}
-            onClick={() => onThemeChange("light")}
-            aria-label="Use light mode"
-            aria-pressed={theme === "light"}
-          >
-            ☀
-          </button> */}
-
+        <h2>Settings</h2>
+        <div className="theme-selector settings-row">
+          <span>THEME</span>
           <Switch
             checked={theme === "dark"}
             onChange={(checked) => onThemeChange(checked ? "dark" : "light")}
             ariaLabel="Toggle theme"
           />
-
-          {/* <button
-            type="button"
-            className={`theme-button ${
-              theme === "dark" ? "theme-button-active" : ""
-            }`}
-            onClick={() => onThemeChange("dark")}
-            aria-label="Use dark mode"
-            aria-pressed={theme === "dark"}
-          >
-            ☾
-          </button> */}
         </div>
 
-        <div className="hard-mode-toggle">
+        <div className="hard-mode-toggle settings-row">
           <span>HARD MODE</span>
           <Switch
             checked={isHardMode}

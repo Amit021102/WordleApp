@@ -397,14 +397,37 @@ main {
 .settings-modal {
   display: flex;
   flex-direction: column;
+  gap: 22px;
+  width: 100%;
+}
+
+.settings-modal h2 {
+  margin-top: 0;
+  text-align: center;
+}
+
+.settings-row {
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 16px;
+}
+
+.settings-row span {
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  color: var(--modal-text-color);
+  text-transform: uppercase;
+  font-weight: 700;
 }
 
 .theme-selector {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 28px;
+  width: 100%;
+}
+
+.hard-mode-toggle {
+  width: 100%;
 }
 
 .theme-button {
