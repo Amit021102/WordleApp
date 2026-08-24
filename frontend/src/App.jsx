@@ -12,8 +12,12 @@ import Toast from "./components/popups/Toast";
 
 import { createGame, submitGuess, updateHardMode } from "./api/gameApi";
 
-const BOARD_ROWS = 6;
-const BOARD_COLS = 5;
+// Only used for the board rendered before the first game arrives. After that
+// the shape comes from the server's create-game response, and the board itself
+// is the source of truth: board.length is the attempt count, and the length of
+// a row is the word length.
+const DEFAULT_BOARD_ROWS = 6;
+const DEFAULT_BOARD_COLS = 5;
 
 // Only meaningful in normal mode. Keys upgrade but never downgrade, so a letter
 // scored green stays green even if a later guess puts it somewhere wrong.
@@ -27,9 +31,18 @@ const STATUS_PRIORITY = {
   green: 3,
 };
 
-const createEmptyBoard = () =>
-  Array.from({ length: BOARD_ROWS }, () =>
-    Array.from({ length: BOARD_COLS }, () => ({
+// Keys the board responds to. Space is included because it is not a game key
+// but would scroll the page, which is the one default worth cancelling purely
+// for the nuisance it causes.
+const isConsumedKey = (key) =>
+  key === "Enter" ||
+  key === "Backspace" ||
+  key === " " ||
+  /^[A-Za-z]$/.test(key);
+
+const createEmptyBoard = (rows = DEFAULT_BOARD_ROWS, cols = DEFAULT_BOARD_COLS) =>
+  Array.from({ length: rows }, () =>
+    Array.from({ length: cols }, () => ({
       value: "",
       status: "",
     })),
@@ -55,7 +68,7 @@ const App = () => {
     try {
       const gameData = await createGame(initialHardMode, initialMode);
 
-      setBoard(createEmptyBoard());
+      setBoard(createEmptyBoard(gameData.max_attempts, gameData.word_length));
       setKeyStatuses({});
       setActiveRowIndex(0);
       setGameId(gameData.game_id);
@@ -85,7 +98,7 @@ const App = () => {
 
       activeRow[nextEmptyColumnIndex] = {
         value: letter.toUpperCase(),
-        // status: "",
+        status: "",
       };
 
       return nextBoard;
@@ -102,7 +115,9 @@ const App = () => {
       );
 
       const lastFilledIndex =
-        nextEmptyColumnIndex === -1 ? BOARD_COLS - 1 : nextEmptyColumnIndex - 1;
+        nextEmptyColumnIndex === -1
+          ? activeRow.length - 1
+          : nextEmptyColumnIndex - 1;
 
       if (lastFilledIndex < 0) {
         return currentBoard;
@@ -110,7 +125,7 @@ const App = () => {
 
       activeRow[lastFilledIndex] = {
         value: "",
-        // status: "",
+        status: "",
       };
 
       return nextBoard;
@@ -120,7 +135,7 @@ const App = () => {
   const submitCurrentGuess = async () => {
     const guess = board[activeRowIndex].map((cell) => cell.value).join("");
 
-    if (guess.length !== BOARD_COLS) {
+    if (guess.length !== board[activeRowIndex].length) {
       setToast({
         id: Date.now(),
         message: "Not enough letters",
@@ -277,7 +292,22 @@ const App = () => {
   // keyboard event listener use effect
   useEffect(() => {
     const handleKeyDown = (event) => {
-      event.preventDefault();
+      // Only cancel the browser's default for keys the game actually consumes.
+      // Cancelling everything would take out Ctrl+R, F5, Ctrl+F and Tab while
+      // the page has focus -- Tab in particular is how a keyboard-only player
+      // reaches the help and settings buttons.
+      const isShortcut = event.ctrlKey || event.metaKey || event.altKey;
+
+      if (!isShortcut && isConsumedKey(event.key)) {
+        // Space would scroll the page and Backspace can trigger "back" in some
+        // webviews; the rest are cancelled so nothing types twice.
+        event.preventDefault();
+      }
+
+      if (isShortcut) {
+        return;
+      }
+
       handleKeyPress(event.key);
     };
 

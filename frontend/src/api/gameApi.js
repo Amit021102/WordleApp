@@ -1,4 +1,8 @@
-const API_BASE_URL = "http://127.0.0.1:8000";
+// Override with VITE_API_BASE_URL in frontend/.env to point at a non-local
+// backend. Vite inlines this at build time, so a deployed bundle needs the
+// variable set when `npm run build` runs, not when it is served.
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
 export const createGame = async (hardMode = false, mode = "normal") => {
   const response = await fetch(

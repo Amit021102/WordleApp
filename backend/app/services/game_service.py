@@ -2,6 +2,7 @@ import uuid
 
 from fastapi import HTTPException
 
+from app.config import DEFAULT_MAX_ATTEMPTS
 from app.game_logic import score_guess, update_hard_constraints
 from app.palettes import assign_rainbow_palette, to_display_colours
 from app.schemas import GuessResponse
@@ -48,8 +49,15 @@ class GameService:
 
         return game["hard_mode_constraints"]
 
-    def create_game(self, answer: str, hard_mode: bool = False, mode: str = "normal") -> str:
+    def create_game(
+        self,
+        answer: str,
+        hard_mode: bool = False,
+        mode: str = "normal",
+        max_attempts: int = DEFAULT_MAX_ATTEMPTS,
+    ) -> str:
         game_id = str(uuid.uuid4())[:8]
+        # The answer decides the word length; nothing else needs to be told.
         length = len(answer)
 
         # Rainbow madness is a variant of the whole game, not a setting layered
@@ -69,6 +77,8 @@ class GameService:
             "hard_mode": hard_mode,
             "hard_mode_constraints": self._build_constraints(length),
             "palette": palette,
+            "word_length": length,
+            "max_attempts": max_attempts,
         }
         return game_id
 
@@ -101,11 +111,13 @@ class GameService:
         # the constraint logic keeps working regardless of mode.
         game["guesses"].append({"guess": guess, "result": result})
 
-        answer = "?????"
+        # Masked to the answer's own length rather than a fixed five characters.
+        answer = "?" * len(game["answer"])
+        max_attempts = game.get("max_attempts", DEFAULT_MAX_ATTEMPTS)
 
         if guess == game["answer"]:
             game["status"] = "won"
-        elif len(game["guesses"]) >= 6:
+        elif len(game["guesses"]) >= max_attempts:
             game["status"] = "lost"
             answer = game["answer"]
 

@@ -150,6 +150,9 @@ main {
 }
 
 .board {
+  /* --word-length is set inline from the game's word_length; --tile-size is
+     overridden in the media queries below so both are changed in one place. */
+  --tile-size: 54px;
   display: grid;
   gap: 4px;
   margin: 12px 0 12px;
@@ -157,13 +160,13 @@ main {
 
 .row {
   display: grid;
-  grid-template-columns: repeat(5, 54px);
+  grid-template-columns: repeat(var(--word-length, 5), var(--tile-size, 54px));
   gap: 4px;
 }
 
 .tile {
-  width: 54px;
-  height: 54px;
+  width: var(--tile-size, 54px);
+  height: var(--tile-size, 54px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -249,9 +252,8 @@ main {
 }
 
 @media (max-width: 480px) {
-  .tile {
-    width: 48px;
-    height: 48px;
+  .board {
+    --tile-size: 48px;
   }
 }
 
@@ -261,18 +263,13 @@ main {
   }
 
   .board {
+    --tile-size: 48px;
     margin: 8px 0;
     gap: 3px;
   }
 
   .row {
-    grid-template-columns: repeat(5, 48px);
     gap: 3px;
-  }
-
-  .tile {
-    width: 48px;
-    height: 48px;
   }
 
   .keyboard {

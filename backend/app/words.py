@@ -1,9 +1,30 @@
 from pathlib import Path
+from typing import List
+
+from app.config import DEFAULT_WORD_LENGTH
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 ANSWER_DIR = DATA_DIR / "answers"
+
+
+def available_word_lengths() -> List[int]:
+    """Word lengths that can actually be played, i.e. that have an answer list.
+
+    Derived from the ``answers_len_<N>.txt`` filenames rather than a hardcoded
+    list, so dropping a new answer file into ``data/answers/`` is all it takes
+    to make another length playable.
+    """
+    lengths = []
+
+    for path in ANSWER_DIR.glob("answers_len_*.txt"):
+        try:
+            lengths.append(int(path.stem.rsplit("_", 1)[-1]))
+        except ValueError:
+            continue
+
+    return sorted(lengths)
 
 
 def is_allowed_word(word: str) -> bool:
@@ -73,11 +94,19 @@ def validate_hard_mode(guess: str, constraints: dict) -> bool:
 
     return True
 
-def random_select_answer(length: int = 5) -> str:
-    """Randomly select a word from the answer-word list."""
+def random_select_answer(length: int = DEFAULT_WORD_LENGTH) -> str:
+    """Randomly select a word from the answer-word list for ``length``.
+
+    Raises ValueError if no answer list exists for that length -- callers should
+    check ``available_word_lengths()`` first and turn this into a 400.
+    """
     import random
 
     answer_file = ANSWER_DIR / f"answers_len_{length}.txt"
+
+    if not answer_file.exists():
+        raise ValueError(f"No answer list for words of length {length}")
+
     with answer_file.open("r", encoding="utf-8") as f:
         answer_words = [line.strip().lower() for line in f if line.strip()]
 

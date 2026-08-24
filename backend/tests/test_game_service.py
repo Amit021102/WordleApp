@@ -1,5 +1,6 @@
 import pytest
 from fastapi import HTTPException
+from app.config import DEFAULT_MAX_ATTEMPTS
 from app.palettes import RAINBOW_TRIOS
 from app.services.game_service import GameService
 from memory import games
@@ -258,3 +259,58 @@ def test_rainbow_stores_guesses_in_semantic_terms():
     assert games[game_id]["guesses"][0]["result"] == [
         "green", "green", "gray", "gray", "green",
     ]
+
+
+# --- configurable game shape ---
+
+def test_create_game_records_word_length_from_the_answer():
+    service = GameService()
+
+    game_id = service.create_game("tigers")
+
+    assert games[game_id]["word_length"] == 6
+
+
+def test_create_game_defaults_to_six_attempts():
+    service = GameService()
+
+    game_id = service.create_game("cigar")
+
+    assert games[game_id]["max_attempts"] == DEFAULT_MAX_ATTEMPTS
+
+
+def test_game_is_lost_after_the_configured_number_of_attempts():
+    service = GameService()
+    game_id = service.create_game("cigar", max_attempts=3)
+
+    first = service.make_guess(game_id, "apple")
+    second = service.make_guess(game_id, "ended")
+    assert first.game_status == "in_progress"
+    assert second.game_status == "in_progress"
+
+    third = service.make_guess(game_id, "moist")
+
+    assert third.game_status == "lost"
+    assert third.attempt_number == 3
+    assert third.answer == "cigar"
+
+
+def test_more_attempts_than_the_default_are_honoured():
+    service = GameService()
+    game_id = service.create_game("cigar", max_attempts=8)
+
+    for _ in range(7):
+        response = service.make_guess(game_id, "apple")
+        assert response.game_status == "in_progress"
+
+    assert service.make_guess(game_id, "apple").game_status == "lost"
+
+
+def test_masked_answer_matches_the_word_length():
+    service = GameService()
+    game_id = service.create_game("tigers")
+
+    response = service.make_guess(game_id, "cigars")
+
+    # not a hardcoded five question marks
+    assert response.answer == "??????"
