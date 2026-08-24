@@ -1,7 +1,36 @@
 import Modal from "./Modal";
 import Tile from "../Tile";
 
-const HelpModal = ({ onClose }) => {
+const HelpModal = ({ isRainbowMode = false, onClose }) => {
+  // The normal rules would give the whole game away here, so rainbow madness
+  // gets its own instructions -- which are, necessarily, mostly about what the
+  // player is not being told.
+  if (isRainbowMode) {
+    return (
+      <Modal onClose={onClose}>
+        <div className="help-modal">
+          <h2>Rainbow madness</h2>
+
+          <p>Guess the word in six tries.</p>
+
+          <section className="help-rule">
+            <p>
+              Every guess is scored with three colours drawn fresh for this
+              game — but <strong>nobody tells you which colour means what</strong>.
+              One means right letter, right place. One means right letter, wrong
+              place. One means the letter is not in the word.
+            </p>
+            <p>
+              Work out which is which as you play. The keyboard stays uncoloured,
+              so the board is all you have to go on.
+            </p>
+            <p>The answer reveals the mapping — see how well you read it.</p>
+          </section>
+        </div>
+      </Modal>
+    );
+  }
+
   return (
     <Modal onClose={onClose}>
       <div className="help-modal">

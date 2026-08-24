@@ -1,0 +1,12 @@
+# Backend dependencies. Pinned to the versions this project is developed against.
+# Python 3.8 — these are the newest releases of each package that still support it.
+#
+#   pip install -r requirements.txt
+
+# --- runtime ---
+fastapi==0.124.4        # app, routing, HTTPException (app/main.py, app/routes/)
+pydantic==2.10.6        # request/response models (app/schemas.py)
+uvicorn==0.33.0         # ASGI server: uvicorn app.main:app --reload --port 8000
+
+# --- development ---
+pytest==8.3.5           # backend test suite (tests/)

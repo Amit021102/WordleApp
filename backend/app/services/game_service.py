@@ -3,6 +3,7 @@ import uuid
 from fastapi import HTTPException
 
 from app.game_logic import score_guess, update_hard_constraints
+from app.palettes import assign_rainbow_palette, to_display_colours
 from app.schemas import GuessResponse
 from app.words import is_allowed_word, validate_hard_mode
 from memory import games
@@ -47,15 +48,27 @@ class GameService:
 
         return game["hard_mode_constraints"]
 
-    def create_game(self, answer: str, hard_mode: bool = False) -> str:
+    def create_game(self, answer: str, hard_mode: bool = False, mode: str = "normal") -> str:
         game_id = str(uuid.uuid4())[:8]
         length = len(answer)
+
+        # Rainbow madness is a variant of the whole game, not a setting layered
+        # on top of it, so it cannot be combined with hard mode. Enforced here at
+        # creation rather than trusted from the caller.
+        if mode == "rainbow":
+            hard_mode = False
+            palette = assign_rainbow_palette()
+        else:
+            palette = None
+
         games[game_id] = {
             "answer": answer,
             "guesses": [],
             "status": "in_progress",
+            "mode": mode,
             "hard_mode": hard_mode,
             "hard_mode_constraints": self._build_constraints(length),
+            "palette": palette,
         }
         return game_id
 
@@ -84,6 +97,8 @@ class GameService:
 
         game["hard_mode_constraints"] = update_hard_constraints(game["hard_mode_constraints"], guess, result)
 
+        # Stored in semantic terms so the game's own history stays readable and
+        # the constraint logic keeps working regardless of mode.
         game["guesses"].append({"guess": guess, "result": result})
 
         answer = "?????"
@@ -94,19 +109,36 @@ class GameService:
             game["status"] = "lost"
             answer = game["answer"]
 
+        # Translate to palette colours on the way out, and only on the way out.
+        palette = game.get("palette")
+        display_result = to_display_colours(result, palette) if palette else result
+
+        # The mapping is the puzzle, so it is revealed only once the game is over.
+        revealed_palette = palette if (palette and game["status"] != "in_progress") else None
+
         return GuessResponse(
             valid=True,
             guess=guess,
-            result=result,
+            result=display_result,
             attempt_number=len(game["guesses"]),
             game_status=game["status"],
             answer=answer,
+            palette=revealed_palette,
         )
 
     def set_hard_mode(self, game_id: str, hard_mode: bool):
         game = self.get_game(game_id)
         if game is None:
             raise HTTPException(status_code=404, detail="Game not found")
+
+        # The two variants are mutually exclusive. Hard mode is meaningless here
+        # anyway -- its feedback is phrased in greens and yellows the rainbow
+        # player is not supposed to be able to identify yet.
+        if game.get("mode") == "rainbow":
+            raise HTTPException(
+                status_code=400,
+                detail="Hard mode is not available in rainbow madness",
+            )
 
         game["hard_mode"] = hard_mode
         self._ensure_constraints(game)

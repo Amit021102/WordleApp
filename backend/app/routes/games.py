@@ -28,13 +28,17 @@ def create_game(request: CreateGameRequest):
     game_id = game_service.create_game(
         answer=random_select_answer(),
         hard_mode=request.hard_mode,
+        mode=request.mode,
     )
     game = game_service.get_game(game_id)
 
+    # hard_mode is read back off the game rather than echoed from the request:
+    # creating a rainbow game forces it off, and the client needs to see that.
     return CreateGameResponse(
         game_id=game_id,
         word_length=5,
         max_attempts=6,
+        mode=game["mode"],
         hard_mode=game["hard_mode"],
         hard_mode_constraints=game["hard_mode_constraints"],
     )

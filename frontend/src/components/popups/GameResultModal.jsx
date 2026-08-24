@@ -1,4 +1,26 @@
 import Modal from "./Modal";
+import Tile from "../Tile";
+
+// Rainbow madness only. The mapping is withheld for the whole game, so this is
+// the player's one chance to see whether they read the board correctly.
+const PALETTE_LEGEND = [
+  { state: "green", label: "Right letter, right place" },
+  { state: "yellow", label: "Right letter, wrong place" },
+  { state: "gray", label: "Not in the word" },
+];
+
+const PaletteReveal = ({ palette }) => (
+  <div className="palette-reveal">
+    <h3 className="palette-reveal-title">The colours meant:</h3>
+
+    {PALETTE_LEGEND.map(({ state, label }) => (
+      <div className="palette-reveal-row" key={state}>
+        <Tile value="" status={palette[state]} className="example-tile" />
+        <span>{label}</span>
+      </div>
+    ))}
+  </div>
+);
 
 const getWinTagline = (guessCount) => {
   switch (guessCount) {
@@ -19,7 +41,7 @@ const getWinTagline = (guessCount) => {
   }
 };
 
-const GameResultModal = ({ result, guessCount, answer, onClose, playAgain }) => {
+const GameResultModal = ({ result, guessCount, answer, palette, onClose, playAgain }) => {
   const didWin = result === "won";
   const tagline = didWin
     ? getWinTagline(guessCount)
@@ -38,6 +60,8 @@ const GameResultModal = ({ result, guessCount, answer, onClose, playAgain }) => 
           {didWin && <p>You solved it in {guessCount} guesses</p>}
           {!didWin && <p>The correct word was <strong>{answer}</strong></p>}
         </div>
+
+        {palette && <PaletteReveal palette={palette} />}
 
         <div className="game-over-actions">
           <button

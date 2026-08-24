@@ -1,6 +1,6 @@
 const API_BASE_URL = "http://127.0.0.1:8000";
 
-export const createGame = async (hardMode = false) => {
+export const createGame = async (hardMode = false, mode = "normal") => {
   const response = await fetch(
     `${API_BASE_URL}/api/games`,
     {
@@ -8,7 +8,7 @@ export const createGame = async (hardMode = false) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ hard_mode: hardMode }),
+      body: JSON.stringify({ hard_mode: hardMode, mode }),
     },
   );
 

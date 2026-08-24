@@ -639,3 +639,125 @@ input:checked + .theme-slider::before {
   /* chnage the value of the second inset in boxshadow to change the angle and direction of the moon */
   box-shadow: inset -3px -2px 5px -2px #8983f7, inset -7px -5px 0 2px #a3dafb;
 }
+
+/* --- rainbow madness --- */
+
+/*
+ * One class per colour name in backend/app/palettes.py. Which class a tile gets
+ * is decided by the server at runtime; the names carry no meaning, which is the
+ * point -- inspecting the DOM reveals a colour, never a state.
+ *
+ * Defined once rather than per theme (as green/yellow/gray already are): these
+ * are mid-saturation tones that hold up against both backgrounds, and the trios
+ * vary in lightness as well as hue so they stay separable without relying on
+ * colour vision alone.
+ */
+
+/* trio: violet / blush / sky */
+.tile-violet {
+  background-color: #7b5fd6;
+  border-color: #7b5fd6;
+  color: #f8f8f8;
+}
+
+.tile-blush {
+  background-color: #d06a9c;
+  border-color: #d06a9c;
+  color: #f8f8f8;
+}
+
+.tile-sky {
+  background-color: #4ea3c4;
+  border-color: #4ea3c4;
+  color: #f8f8f8;
+}
+
+/* trio: rust / grape / teal */
+.tile-rust {
+  background-color: #c25a3a;
+  border-color: #c25a3a;
+  color: #f8f8f8;
+}
+
+.tile-grape {
+  background-color: #8e5bc9;
+  border-color: #8e5bc9;
+  color: #f8f8f8;
+}
+
+.tile-teal {
+  background-color: #3f8f9c;
+  border-color: #3f8f9c;
+  color: #f8f8f8;
+}
+
+/* trio: magenta / indigo / copper */
+.tile-magenta {
+  background-color: #b5539e;
+  border-color: #b5539e;
+  color: #f8f8f8;
+}
+
+.tile-indigo {
+  background-color: #5c6bc9;
+  border-color: #5c6bc9;
+  color: #f8f8f8;
+}
+
+.tile-copper {
+  background-color: #c9773f;
+  border-color: #c9773f;
+  color: #f8f8f8;
+}
+
+/* end-of-game mapping reveal in the result modal */
+.palette-reveal {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin: 4px 0 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.palette-reveal-title {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  color: var(--modal-text-color);
+}
+
+.palette-reveal-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--modal-text-color);
+  font-size: 0.9rem;
+}
+
+/* --- settings rows with explanatory hints --- */
+
+.settings-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.settings-hint {
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.7;
+  color: var(--modal-text-color);
+}
+
+.switch-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.switch-disabled input {
+  cursor: not-allowed;
+}

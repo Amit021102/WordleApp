@@ -15,6 +15,12 @@ import { createGame, submitGuess, updateHardMode } from "./api/gameApi";
 const BOARD_ROWS = 6;
 const BOARD_COLS = 5;
 
+// Only meaningful in normal mode. Keys upgrade but never downgrade, so a letter
+// scored green stays green even if a later guess puts it somewhere wrong.
+//
+// This ladder is exactly why the keyboard stays uncoloured in rainbow madness:
+// ranking is public knowledge (gray < yellow < green), so watching a key upgrade
+// from one colour to another would give the mapping away for free.
 const STATUS_PRIORITY = {
   gray: 1,
   yellow: 2,
@@ -34,6 +40,8 @@ const App = () => {
   const [activeRowIndex, setActiveRowIndex] = useState(0);
   const [finalGuessCount, setFinalGuessCount] = useState(0);
   const [gameId, setGameId] = useState(null);
+  const [mode, setMode] = useState("normal");
+  const [revealedPalette, setRevealedPalette] = useState(null);
   const [hardMode, setHardMode] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [correctWord, setCorrectWord] = useState("")
@@ -43,19 +51,20 @@ const App = () => {
   const [theme, setTheme] = useState("dark");
   const [shakingRowIndex, setShakingRowIndex] = useState(null);
 
-  const startNewGame = async (initialHardMode = false) => {
+  const startNewGame = async (initialHardMode = false, initialMode = "normal") => {
     try {
-      const gameData = await createGame(initialHardMode);
-      // console.log("Game data received:", gameData);
+      const gameData = await createGame(initialHardMode, initialMode);
 
       setBoard(createEmptyBoard());
       setKeyStatuses({});
       setActiveRowIndex(0);
       setGameId(gameData.game_id);
       setGameOver(false);
-      setHardMode(initialHardMode);
-
-      console.log("Created game:", gameData);
+      setRevealedPalette(null);
+      // Read back from the response rather than the arguments: the server
+      // forces hard mode off for a rainbow game, and that has to be reflected.
+      setMode(gameData.mode);
+      setHardMode(gameData.hard_mode);
     } catch (error) {
       console.error("Could not start a new game:", error);
     }
@@ -120,12 +129,28 @@ const App = () => {
       return;
     }
 
-    const response = await submitGuess(gameId, guess);
+    let response;
 
-    console.log(response);
+    try {
+      response = await submitGuess(gameId, guess);
+    } catch (error) {
+      console.error("Could not submit guess:", error);
+      setToast({
+        id: Date.now(),
+        message: "Connection problem — try again",
+      });
+      shakeActiveRow();
+      return;
+    }
+
     if (response.valid) {
       colorActiveRow(response.result);
-      updateKeyStatuses(guess, response.result);
+
+      // Rainbow madness: leave the keyboard uncoloured. See STATUS_PRIORITY.
+      if (mode !== "rainbow") {
+        updateKeyStatuses(guess, response.result);
+      }
+
       setActiveRowIndex((index) => index + 1);
 
       const game_status = response.game_status;
@@ -133,6 +158,8 @@ const App = () => {
         setGameOver(true);
         setCorrectWord(response.answer)
         setFinalGuessCount(activeRowIndex + 1);
+        // Null in normal mode; the decoded mapping when a rainbow game ends.
+        setRevealedPalette(response.palette ?? null);
 
         setTimeout(() => {
           setActiveModal(game_status);
@@ -227,6 +254,21 @@ const App = () => {
     }
   };
 
+  // Switching variants always starts a fresh game: the colour mapping is drawn
+  // when the game is created, so there is no way to convert a board in flight.
+  const toggleRainbowMode = (enabled) => {
+    const nextMode = enabled ? "rainbow" : "normal";
+
+    if (nextMode === mode) {
+      return;
+    }
+
+    // Rainbow games are never hard mode; coming back out, start clean rather
+    // than silently restoring a setting the player last saw a while ago.
+    startNewGame(false, nextMode);
+    setActiveModal(null);
+  };
+
   // game init use effect
   useEffect(() => {
     startNewGame();
@@ -260,12 +302,12 @@ const App = () => {
   }, [toast]);
 
   return (
-    <div className={`app theme-${theme}`}>
+    <div className={`app theme-${theme} mode-${mode}`}>
       <header className="header">
         <IconButton label="Help" onClick={() => setActiveModal("help")}>
           ?
         </IconButton>
-        <h1>Infinite Wordle</h1>
+        <h1>{mode === "rainbow" ? "Rainbow Madness" : "Infinite Wordle"}</h1>
         <IconButton label="Settings" onClick={() => setActiveModal("settings")}>
           ⚙
         </IconButton>
@@ -276,7 +318,7 @@ const App = () => {
           <button
             type="button"
             className="new-game-button"
-            onClick={() => startNewGame(hardMode)}
+            onClick={() => startNewGame(hardMode, mode)}
           >
             New game
           </button>
@@ -297,12 +339,17 @@ const App = () => {
           onThemeChange={setTheme}
           isHardMode={hardMode}
           onHardModeChange={toggleHardMode}
+          isRainbowMode={mode === "rainbow"}
+          onRainbowModeChange={toggleRainbowMode}
           onClose={() => setActiveModal(null)}
         />
       )}
 
       {activeModal === "help" && (
-        <HelpModal onClose={() => setActiveModal(null)} />
+        <HelpModal
+          isRainbowMode={mode === "rainbow"}
+          onClose={() => setActiveModal(null)}
+        />
       )}
 
       {(activeModal === "won" || activeModal === "lost") && (
@@ -310,10 +357,11 @@ const App = () => {
           result={activeModal}
           guessCount={finalGuessCount}
           answer={correctWord}
+          palette={revealedPalette}
           onClose={() => setActiveModal(null)}
           playAgain={() => {
             setActiveModal(null)
-            startNewGame(hardMode)
+            startNewGame(hardMode, mode)
           }
           }
         />

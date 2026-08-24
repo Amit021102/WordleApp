@@ -1,5 +1,6 @@
 import pytest
 from fastapi import HTTPException
+from app.palettes import RAINBOW_TRIOS
 from app.services.game_service import GameService
 from memory import games
 
@@ -151,3 +152,109 @@ def test_make_guess_after_loss_raises_finished_game_error():
 
     assert exc_info.value.status_code == 400
     assert exc_info.value.detail == "Game already finished"
+
+# --- rainbow madness ---
+
+def test_create_rainbow_game_assigns_a_palette():
+    service = GameService()
+    game_id = service.create_game("cigar", mode="rainbow")
+
+    palette = games[game_id]["palette"]
+
+    assert games[game_id]["mode"] == "rainbow"
+    assert set(palette) == {"green", "yellow", "gray"}
+    # a bijection onto one trio: three distinct colours, none of them the
+    # normal-mode names the player would recognise
+    assert len(set(palette.values())) == 3
+    assert not set(palette.values()) & {"green", "yellow", "gray"}
+
+
+def test_create_rainbow_game_uses_a_known_trio():
+    service = GameService()
+    game_id = service.create_game("cigar", mode="rainbow")
+
+    colours = set(games[game_id]["palette"].values())
+
+    assert any(colours == set(trio) for trio in RAINBOW_TRIOS)
+
+
+def test_normal_game_has_no_palette():
+    service = GameService()
+    game_id = service.create_game("cigar")
+
+    assert games[game_id]["mode"] == "normal"
+    assert games[game_id]["palette"] is None
+
+
+def test_rainbow_game_forces_hard_mode_off():
+    service = GameService()
+    game_id = service.create_game("cigar", hard_mode=True, mode="rainbow")
+
+    assert games[game_id]["hard_mode"] is False
+
+
+def test_rainbow_game_rejects_enabling_hard_mode():
+    service = GameService()
+    game_id = service.create_game("cigar", mode="rainbow")
+
+    with pytest.raises(HTTPException) as exc_info:
+        service.set_hard_mode(game_id, True)
+
+    assert exc_info.value.status_code == 400
+    assert games[game_id]["hard_mode"] is False
+
+
+def test_rainbow_guess_returns_palette_colours_not_states():
+    service = GameService()
+    game_id = service.create_game("cigar", mode="rainbow")
+    palette = games[game_id]["palette"]
+
+    response = service.make_guess(game_id, "cider")
+
+    # same shape as the normal-mode result, translated through the palette
+    assert response.result == [
+        palette["green"],
+        palette["green"],
+        palette["gray"],
+        palette["gray"],
+        palette["green"],
+    ]
+    assert not set(response.result) & {"green", "yellow", "gray"}
+
+
+def test_rainbow_hides_palette_until_the_game_ends():
+    service = GameService()
+    game_id = service.create_game("cigar", mode="rainbow")
+
+    ongoing = service.make_guess(game_id, "cider")
+    assert ongoing.game_status == "in_progress"
+    assert ongoing.palette is None
+
+    finished = service.make_guess(game_id, "cigar")
+    assert finished.game_status == "won"
+    assert finished.palette == games[game_id]["palette"]
+
+
+def test_rainbow_reveals_palette_on_a_loss_too():
+    service = GameService()
+    game_id = service.create_game("cigar", mode="rainbow")
+
+    for _ in range(5):
+        service.make_guess(game_id, "apple")
+    response = service.make_guess(game_id, "apple")
+
+    assert response.game_status == "lost"
+    assert response.palette == games[game_id]["palette"]
+
+
+def test_rainbow_stores_guesses_in_semantic_terms():
+    service = GameService()
+    game_id = service.create_game("cigar", mode="rainbow")
+
+    service.make_guess(game_id, "cider")
+
+    # the palette is a presentation concern; internal state stays semantic so
+    # the scoring and constraint logic never has to know about rainbow mode
+    assert games[game_id]["guesses"][0]["result"] == [
+        "green", "green", "gray", "gray", "green",
+    ]

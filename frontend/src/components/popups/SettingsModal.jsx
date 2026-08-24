@@ -1,7 +1,15 @@
 import Modal from "./Modal";
 import Switch from "../Switch";
 
-const SettingsModal = ({ theme, onThemeChange, isHardMode, onHardModeChange, onClose }) => {
+const SettingsModal = ({
+  theme,
+  onThemeChange,
+  isHardMode,
+  onHardModeChange,
+  isRainbowMode,
+  onRainbowModeChange,
+  onClose,
+}) => {
   return (
     <Modal onClose={onClose}>
       <div className="settings-modal">
@@ -16,24 +24,37 @@ const SettingsModal = ({ theme, onThemeChange, isHardMode, onHardModeChange, onC
         </div>
 
         <div className="hard-mode-toggle settings-row">
-          <span>HARD MODE</span>
+          <div className="settings-label">
+            <span>HARD MODE</span>
+            {isRainbowMode && (
+              <small className="settings-hint">
+                Not available in rainbow madness
+              </small>
+            )}
+          </div>
           <Switch
             checked={isHardMode}
             onChange={(c) => onHardModeChange(!isHardMode)}
             ariaLabel="Toggle hard mode"
             isThemeSwitch={false}
+            disabled={isRainbowMode}
           />
         </div>
 
-        {/* <div>
-          <span>HARD MODE</span>
+        <div className="rainbow-mode-toggle settings-row">
+          <div className="settings-label">
+            <span>RAINBOW MADNESS</span>
+            <small className="settings-hint">
+              New colours, meanings unknown. Starts a new game.
+            </small>
+          </div>
           <Switch
-            checked={isHardMode}
-            onChange={(c) => onHardModeChange(!isHardMode)}
-            ariaLabel="Toggle hard mode"
+            checked={isRainbowMode}
+            onChange={onRainbowModeChange}
+            ariaLabel="Toggle rainbow madness"
             isThemeSwitch={false}
           />
-        </div> */}
+        </div>
       </div>
     </Modal>
   );
